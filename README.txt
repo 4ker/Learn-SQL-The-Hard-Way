@@ -13,18 +13,133 @@ files.
 install:
 
 ```bash
+# MySQL
 $ sudo apt install mysql-server
 $ mysql -u root -p
+
+# sqlite
+sudo apt install sqlite3
 ```
 
 ```sql
 %include <-=Exercise-0-The-Setup/create_database.sql=
 ```
 
+SQLite 是一个进程内的库，实现了自给自足的、无服务器的、零配置的、事务性的 SQL
+数据库引擎。它是一个零配置的数据库，这意味着与其他数据库一样，您不需要在系统中配置。
+
+
+为什么要用 SQLite？
+
+-   不需要一个单独的服务器进程或操作的系统（无服务器的）。
+-   SQLite 不需要配置，这意味着不需要安装或管理。
+-   一个完整的 SQLite 数据库是存储在一个单一的跨平台的磁盘文件。
+-   SQLite 是非常小的，是轻量级的，完全配置时小于
+    400KiB，省略可选功能配置时小于 250KiB。
+-   SQLite 是自给自足的，这意味着不需要任何外部的依赖。
+-   SQLite 事务是完全兼容 ACID 的，允许从多个进程或线程安全访问。
+-   SQLite 支持 SQL92（SQL2）标准的大多数查询语言的功能。
+-   SQLite 使用 ANSI-C 编写的，并提供了简单和易于使用的 API。
+-   SQLite 可在 UNIX（Linux, Mac OS-X, Android, iOS）和 Windows（Win32, WinCE,
+    WinRT）中运行。
+
+SQLite 命令
+
+-   DDL
+    -   create,
+    -   alter,
+    -   drop
+-   DML
+    -   insert,
+    -   update,
+    -   delete
+-   DQL
+    -   select
+
+Commands of `sqlite3`
+
+-   .help
+
+    上面的命令会显示各种重要的 SQLite 点命令的列表，如下所示：
+
+    | 命令 | 描述 |
+    | :--- | :--- |
+    | .backup ?DB? FILE | 备份 DB 数据库（默认是 "main"）到 FILE 文件。 |
+    | .bail ON|OFF | 发生错误后停止。默认为 OFF。 |
+    | .databases | 列出附加数据库的名称和文件。 |
+    | .dump ?TABLE? | 以 SQL 文本格式转储数据库。如果指定了 TABLE 表，则只转储匹配 LIKE 模式的 TABLE 表。 |
+    | .echo ON|OFF | 开启或关闭 echo 命令。 |
+    | .exit | 退出 SQLite 提示符。 |
+    | .explain ON|OFF | 开启或关闭适合于 EXPLAIN 的输出模式。如果没有带参数，则为 EXPLAIN on，及开启 EXPLAIN。 |
+    | .header(s) ON|OFF | 开启或关闭头部显示。 |
+    | .help | 显示消息。 |
+    | .import FILE TABLE | 导入来自 FILE 文件的数据到 TABLE 表中。 |
+    | .indices ?TABLE? | 显示所有索引的名称。如果指定了 TABLE 表，则只显示匹配 LIKE 模式的 TABLE 表的索引。 |
+    | .load FILE ?ENTRY? | 加载一个扩展库。 |
+    | .log FILE|off | 开启或关闭日志。FILE 文件可以是 stderr（标准错误）/stdout（标准输出）。 |
+    | .mode MODE | 设置输出模式 |
+    | .nullvalue STRING | 在 NULL 值的地方输出 STRING 字符串。 |
+    | .output FILENAME | 发送输出到 FILENAME 文件。 |
+    | .output stdout | 发送输出到屏幕。 |
+    | .print STRING... | 逐字地输出 STRING 字符串。 |
+    | .prompt MAIN CONTINUE | 替换标准提示符。 |
+    | .quit | 退出 SQLite 提示符。 |
+    | .read FILENAME | 执行 FILENAME 文件中的 SQL。 |
+    | .schema ?TABLE? | 显示 CREATE 语句。如果指定了 TABLE 表，则只显示匹配 LIKE 模式的 TABLE 表。 |
+    | .separator STRING | 改变输出模式和 .import 所使用的分隔符。 |
+    | .show | 显示各种设置的当前值。 |
+    | .stats ON|OFF | 开启或关闭统计。 |
+    | .tables ?PATTERN? | 列出匹配 LIKE 模式的表的名称。 |
+    | .timeout MS | 尝试打开锁定的表 MS 毫秒。 |
+    | .width NUM NUM | 为 "column" 模式设置列宽度。 |
+    | .timer ON|OFF | 开启或关闭 CPU 定时器。 |
+
+    让我们尝试使用 `.show` 命令，来查看 SQLite 命令提示符的默认设置。
+
+    ```
+    sqlite>.header on
+    sqlite>.mode column
+    sqlite>.timer on
+    ```
+
+-   SQLite 语法
+
+    ```
+    sqlite>.help -- This is a single line comment
+    ```
+
+-   SQLite 数据类型
+
+    NULL, INTERGER, REAL, TEXT, BLOB
+
+```bash
+$sqlite3 DatabaseName.db
+sqlite> .databases
+seq  name             file
+---  ---------------  ----------------------------------------------------------
+0    main             /home/tzx/git/Learn-SQL-The-Hard-Way/DatabaseName.db
+
+sqlite> .quit
+```
+
+.dump
+
 ## Exercise-1-Creating-Tables
 
 ```sql
 %include <-=Exercise-1-Creating-Tables/create_table.sql=
+```
+
+![](https://sqlite.org/images/syntax/create-table-stmt.gif)
+
+```sql
+CREATE TABLE database_name.table_name(
+   column1 datatype  PRIMARY KEY(one or more columns),
+   column2 datatype,
+   column3 datatype,
+   .....
+   columnN datatype,
+);
 ```
 
 ## Exercise-2-Creating-A-MultiTable-Database
@@ -33,10 +148,54 @@ $ mysql -u root -p
 %include <-=Exercise-2-Creating-A-MultiTable-Database/multi-table.sql=
 ```
 
+```
+CREATE TABLE COMPANY(
+   ID INT PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL,
+   ADDRESS        CHAR(50),
+   SALARY         REAL
+);
+
+CREATE TABLE DEPARTMENT(
+   ID INT PRIMARY KEY      NOT NULL,
+   DEPT           CHAR(50) NOT NULL,
+   EMP_ID         INT      NOT NULL
+);
+```
+
+.tables
+
+.schema COMPANY
+
+DROP TABLE database_name.table_name;
+
 ## Exercise-3-Inserting-Data
 
 ```sql
 %include <-=Exercise-3-Inserting-Data/insert-values.sql=
+```
+
+```sql
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (1, 'Paul', 32, 'California', 20000.00 );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (2, 'Allen', 25, 'Texas', 15000.00 );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (3, 'Teddy', 23, 'Norway', 20000.00 );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (4, 'Mark', 25, 'Rich-Mond ', 65000.00 );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (5, 'David', 27, 'Texas', 85000.00 );
+
+INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)
+VALUES (6, 'Kim', 22, 'South-Hall', 45000.00 );
+
+INSERT INTO COMPANY VALUES (7, 'James', 24, 'Houston', 10000.00 );
 ```
 
 ## Exercise-4-Insert-Referential-Data
@@ -108,4 +267,9 @@ $ mysql -u root -p
 %include <-=Exercise-14-Basic-Transactions/transaction.sql=
 ```
 
+---
 
+## References
+
+-   [SQLite 教程 | 菜鸟教程](http://www.runoob.com/sqlite/sqlite-tutorial.html)
+-   [SQLite Query Language: CREATE TABLE](https://sqlite.org/lang_createtable.html)

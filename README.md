@@ -885,3 +885,195 @@ END;
 
 -   [SQLite 教程 | 菜鸟教程](http://www.runoob.com/sqlite/sqlite-tutorial.html)
 -   [SQLite Query Language: CREATE TABLE](https://sqlite.org/lang_createtable.html)
+-   [irsal/TWU_Biblioteca_Databases](https://github.com/irsal/TWU_Biblioteca_Databases)
+
+---
+
+## Homework
+
+```sql
+sqlite> .tables
+book           checkout_item  member         movie
+
+sqlite> .schema book
+CREATE TABLE book (                     --  表 book：就有 id 和 title（title 是 unique）
+  id integer primary key,
+  title text,
+  unique(title)
+);
+sqlite> .schema checkout_item           --  表 checkout_item：member id，book id，movie id
+CREATE TABLE checkout_item (
+  member_id integer,
+  book_id integer,
+  movie_id integer,
+  unique(member_id, book_id, movie_id) on conflict replace,
+  unique(book_id),
+  unique(movie_id)
+);
+
+sqlite> .schema member                  --  表 member：id，name
+CREATE TABLE member (
+  id integer primary key,
+  name text,
+  unique(name)
+);
+
+sqlite> .schema movie                   --  表 movie：id，title，可以看到 book 和 movie 其实一样
+CREATE TABLE movie (
+  id integer primary key,
+  title text,
+  unique(title)
+);
+```
+
+1.  Who checked out the book 'The Hobbit’?
+
+    ```sql
+    select member.name from member
+    where id = (
+        select member_id from checkout_item
+        where book_id = (select id from book where title = 'The Hobbit')
+    );
+    ```
+
+    output:
+
+    ```
+    Anand Beck
+    ```
+
+2.  How many people have not checked out anything?
+
+    ```sql
+    select count(*) from member
+    left join checkout_item on member.id = checkout_item.member_id
+    where checkout_item.member_id is NULL;
+    ```
+
+    output:
+
+    ```
+    37
+    ```
+
+3.  What books and movies aren't checked out?
+
+    ```sql
+    select title from book
+    left join checkout_item on book.id = checkout_item.book_id
+    where member_id is null union
+    select title from movie left join checkout_item on movie.id = checkout_item.movie_id
+    where member_id is null;
+    ```
+
+    output:
+
+    ```
+    1984
+    Catcher in the Rye
+    Crouching Tiger, Hidden Dragon
+    Domain Driven Design
+    Fellowship of the Ring
+    Lawrence of Arabia
+    Office Space
+    Thin Red Line
+    To Kill a Mockingbird
+    Tom Sawyer
+    ```
+
+4.  Add the book 'The Pragmatic Programmer', and add yourself as a member.
+    Check out 'The Pragmatic Programmer'. Use your query from question 1 to
+    verify that you have checked it out. Also, provide the SQL used to update
+    the database.
+
+    ```sql
+    insert into book (title) values ('The Pragmatic Programmer');
+    insert into member (name) values ('Zhixiong Tang');
+    insert into checkout_item (member_id, book_id) values (
+        (select id from member where name = 'Irsal Alsanea'),
+        (select id from book where title = 'The Pragmatic Programmer')
+    );
+    ```
+
+5.  Who has checked out more that 1 item? (Tip: Research the GROUP BY syntax.)
+
+    ```sql
+    select name from member where id in (select member_id
+        from (
+            select member_id, count(member_id) as count_of_members from checkout_item group by member_id
+        )
+        where count_of_members > 1
+    );
+    ```
+
+    output:
+
+    ```
+    Anand Beck
+    Frank Smith
+    ```
+
+The submit:
+
+```sql
+--  1.  Who checked out the book 'The Hobbit’?
+--------------------------------------------------------------------------------
+select member.name from member
+where id = (
+    select member_id from checkout_item
+    where book_id = (select id from book where title = 'The Hobbit')
+);
+--  output:
+--      Anand Beck
+
+--  2.  How many people have not checked out anything?
+--------------------------------------------------------------------------------
+select count(*) from member
+left join checkout_item on member.id = checkout_item.member_id
+where checkout_item.member_id is NULL;
+--  output:
+--      37
+
+--  3.  What books and movies aren't checked out?
+--------------------------------------------------------------------------------
+select title from book
+left join checkout_item on book.id = checkout_item.book_id
+where member_id is null union
+select title from movie left join checkout_item on movie.id = checkout_item.movie_id
+where member_id is null;
+--  output:
+--      1984
+--      Catcher in the Rye
+--      Crouching Tiger, Hidden Dragon
+--      Domain Driven Design
+--      Fellowship of the Ring
+--      Lawrence of Arabia
+--      Office Space
+--      Thin Red Line
+--      To Kill a Mockingbird
+--      Tom Sawyer
+
+--  4.  Add the book 'The Pragmatic Programmer', and add yourself as a member.
+        Check out 'The Pragmatic Programmer'. Use your query from question 1 to
+        verify that you have checked it out. Also, provide the SQL used to update
+        the database.
+--------------------------------------------------------------------------------
+insert into book (title) values ('The Pragmatic Programmer');
+insert into member (name) values ('Zhixiong Tang');
+insert into checkout_item (member_id, book_id) values (
+    (select id from member where name = 'Irsal Alsanea'),
+    (select id from book where title = 'The Pragmatic Programmer')
+);
+
+--  5.  Who has checked out more that 1 item? (Tip: Research the GROUP BY syntax.)
+--------------------------------------------------------------------------------
+select name from member where id in (select member_id
+    from (
+        select member_id, count(member_id) as count_of_members from checkout_item group by member_id
+    )
+    where count_of_members > 1
+);
+--  output:
+--      Anand Beck
+--      Frank Smith
+```

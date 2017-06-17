@@ -1054,9 +1054,9 @@ where member_id is null;
 --      Tom Sawyer
 
 --  4.  Add the book 'The Pragmatic Programmer', and add yourself as a member.
-        Check out 'The Pragmatic Programmer'. Use your query from question 1 to
-        verify that you have checked it out. Also, provide the SQL used to update
-        the database.
+--      Check out 'The Pragmatic Programmer'. Use your query from question 1 to
+--      verify that you have checked it out. Also, provide the SQL used to update
+--      the database.
 --------------------------------------------------------------------------------
 insert into book (title) values ('The Pragmatic Programmer');
 insert into member (name) values ('Zhixiong Tang');

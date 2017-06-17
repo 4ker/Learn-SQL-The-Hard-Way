@@ -15,4 +15,3 @@ CREATE DATABASE learn_sql_the_hard_way;
 
 -- Let's check out what we did
 SHOW DATABASES;
-
